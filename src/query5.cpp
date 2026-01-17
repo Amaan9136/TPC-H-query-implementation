@@ -72,22 +72,22 @@ bool readTPCHData(const std::string& table_path, std::vector<std::map<std::strin
     
     std::cout << "Reading TPCH data from: " << table_path << std::endl;
     
-    region_data = readCSV(table_path + "/region.tbl", {"r_regionkey", "r_name", "r_comment"});
+    region_data = readCSV(table_path + "\\region.tbl", {"r_regionkey", "r_name", "r_comment"});
     std::cout << "Loaded " << region_data.size() << " regions" << std::endl;
     
-    nation_data = readCSV(table_path + "/nation.tbl", {"n_nationkey", "n_name", "n_regionkey", "n_comment"});
+    nation_data = readCSV(table_path + "\\nation.tbl", {"n_nationkey", "n_name", "n_regionkey", "n_comment"});
     std::cout << "Loaded " << nation_data.size() << " nations" << std::endl;
     
-    supplier_data = readCSV(table_path + "/supplier.tbl", {"s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment"});
+    supplier_data = readCSV(table_path + "\\supplier.tbl", {"s_suppkey", "s_name", "s_address", "s_nationkey", "s_phone", "s_acctbal", "s_comment"});
     std::cout << "Loaded " << supplier_data.size() << " suppliers" << std::endl;
     
-    customer_data = readCSV(table_path + "/customer.tbl", {"c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment"});
+    customer_data = readCSV(table_path + "\\customer.tbl", {"c_custkey", "c_name", "c_address", "c_nationkey", "c_phone", "c_acctbal", "c_mktsegment", "c_comment"});
     std::cout << "Loaded " << customer_data.size() << " customers" << std::endl;
     
-    orders_data = readCSV(table_path + "/orders.tbl", {"o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment"});
+    orders_data = readCSV(table_path + "\\orders.tbl", {"o_orderkey", "o_custkey", "o_orderstatus", "o_totalprice", "o_orderdate", "o_orderpriority", "o_clerk", "o_shippriority", "o_comment"});
     std::cout << "Loaded " << orders_data.size() << " orders" << std::endl;
     
-    lineitem_data = readCSV(table_path + "/lineitem.tbl", {"l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment"});
+    lineitem_data = readCSV(table_path + "\\lineitem.tbl", {"l_orderkey", "l_partkey", "l_suppkey", "l_linenumber", "l_quantity", "l_extendedprice", "l_discount", "l_tax", "l_returnflag", "l_linestatus", "l_shipdate", "l_commitdate", "l_receiptdate", "l_shipinstruct", "l_shipmode", "l_comment"});
     std::cout << "Loaded " << lineitem_data.size() << " line items" << std::endl;
     
     return !region_data.empty() && !nation_data.empty() && !supplier_data.empty() && !customer_data.empty() && !orders_data.empty() && !lineitem_data.empty();
@@ -100,8 +100,8 @@ bool executeQuery5(const std::string& r_name, const std::string& start_date, con
     
     std::string target_region_key;
     for (const auto& region : region_data) {
-        if (region["r_name"] == r_name) {
-            target_region_key = region["r_regionkey"];
+        if (region.at("r_name") == r_name) {
+            target_region_key = region.at("r_regionkey");
             break;
         }
     }
@@ -115,39 +115,39 @@ bool executeQuery5(const std::string& r_name, const std::string& start_date, con
     std::unordered_set<std::string> valid_nations;
     
     for (const auto& nation : nation_data) {
-        if (nation["n_regionkey"] == target_region_key) {
-            std::string n_key = nation["n_nationkey"];
-            nation_names[n_key] = nation["n_name"];
+        if (nation.at("n_regionkey") == target_region_key) {
+            std::string n_key = nation.at("n_nationkey");
+            nation_names[n_key] = nation.at("n_name");
             valid_nations.insert(n_key);
         }
     }
     
     std::unordered_map<std::string, std::string> supplier_to_nation;
     for (const auto& supplier : supplier_data) {
-        std::string s_nationkey = supplier["s_nationkey"];
+        std::string s_nationkey = supplier.at("s_nationkey");
         if (valid_nations.count(s_nationkey)) {
-            supplier_to_nation[supplier["s_suppkey"]] = s_nationkey;
+            supplier_to_nation[supplier.at("s_suppkey")] = s_nationkey;
         }
     }
     
     std::unordered_map<std::string, std::string> customer_to_nation;
     for (const auto& customer : customer_data) {
-        std::string c_nationkey = customer["c_nationkey"];
+        std::string c_nationkey = customer.at("c_nationkey");
         if (valid_nations.count(c_nationkey)) {
-            customer_to_nation[customer["c_custkey"]] = c_nationkey;
+            customer_to_nation[customer.at("c_custkey")] = c_nationkey;
         }
     }
     
     std::unordered_map<std::string, std::string> valid_orders;
     for (const auto& order : orders_data) {
-        std::string order_date = order["o_orderdate"];
+        std::string order_date = order.at("o_orderdate");
         
         if (order_date >= start_date && order_date < end_date) {
-            std::string custkey = order["o_custkey"];
+            std::string custkey = order.at("o_custkey");
             auto cust_it = customer_to_nation.find(custkey);
             
             if (cust_it != customer_to_nation.end()) {
-                valid_orders[order["o_orderkey"]] = cust_it->second;
+                valid_orders[order.at("o_orderkey")] = cust_it->second;
             }
         }
     }
@@ -155,8 +155,8 @@ bool executeQuery5(const std::string& r_name, const std::string& start_date, con
     std::cout << "Valid orders: " << valid_orders.size() << std::endl;
     
     for (const auto& line : lineitem_data) {
-        std::string l_orderkey = line["l_orderkey"];
-        std::string l_suppkey = line["l_suppkey"];
+        std::string l_orderkey = line.at("l_orderkey");
+        std::string l_suppkey = line.at("l_suppkey");
         
         auto order_it = valid_orders.find(l_orderkey);
         if (order_it == valid_orders.end()) continue;
@@ -174,8 +174,8 @@ bool executeQuery5(const std::string& r_name, const std::string& start_date, con
         
         std::string nation_name = nation_it->second;
         
-        double extended_price = std::stod(line["l_extendedprice"]);
-        double discount = std::stod(line["l_discount"]);
+        double extended_price = std::stod(line.at("l_extendedprice"));
+        double discount = std::stod(line.at("l_discount"));
         double revenue = extended_price * (1.0 - discount);
         
         results[nation_name] += revenue;
