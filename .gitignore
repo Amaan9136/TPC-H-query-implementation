@@ -1,0 +1,10 @@
+data/
+*.tbl
+results/
+*.exe
+*.o
+*.obj
+tpch-tools/
+screenshots/*.png
+screenshots/*.jpg
+*.zip
